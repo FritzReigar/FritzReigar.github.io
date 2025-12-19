@@ -10,8 +10,9 @@
             --card-bg: #1e1e1e;
             --text-main: #e0e0e0;
             --text-dim: #a0a0a0;
-            --accent: #BB86FC; /* Un toque morado estilo Persona/Cyber */
+            --accent: #BB86FC; /* Morado Persona/Cyber */
             --accent-hover: #3700B3;
+            --timer-bg: #2c2c2c;
         }
 
         body {
@@ -26,15 +27,12 @@
         }
 
         /* --- RELOJ Y FECHA --- */
-        #header {
-            margin-top: 60px;
-            text-align: center;
-        }
-        #clock { font-size: 4rem; font-weight: bold; letter-spacing: 2px; }
-        #date { font-size: 1.2rem; color: var(--text-dim); margin-top: -10px; }
+        #header { margin-top: 40px; text-align: center; }
+        #clock { font-size: 3.5rem; font-weight: bold; letter-spacing: 2px; }
+        #date { font-size: 1.1rem; color: var(--text-dim); margin-top: -10px; }
 
         /* --- BUSCADOR --- */
-        #search-container { margin: 40px 0; width: 100%; max-width: 600px; padding: 0 20px; box-sizing: border-box; }
+        #search-container { margin: 30px 0; width: 100%; max-width: 600px; padding: 0 20px; box-sizing: border-box; }
         #search-bar {
             width: 100%;
             padding: 15px 20px;
@@ -45,17 +43,87 @@
             font-size: 1.1rem;
             outline: none;
             transition: border-color 0.3s;
+            text-align: center;
         }
         #search-bar:focus { border-color: var(--accent); }
+
+        /* --- POMODORO WIDGET --- */
+        #pomodoro {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 20px 40px;
+            border-radius: 20px;
+            border: 1px solid #333;
+        }
+
+        .timer-circle {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+        
+        .timer-circle svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .timer-circle circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .bg-ring { stroke: var(--timer-bg); }
+        .progress-ring { 
+            stroke: var(--accent); 
+            stroke-dasharray: 339.292; /* 2 * PI * r (r=54) */
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .time-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        button:hover { background: var(--accent); color: white; }
+        
+        .mode-toggle { border-color: var(--text-dim); color: var(--text-dim); }
+        .mode-toggle:hover { background: var(--text-dim); color: #121212; }
 
         /* --- GRID DE ENLACES --- */
         #grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             width: 100%;
             max-width: 1000px;
-            padding: 20px;
+            padding: 0 20px 40px 20px;
             box-sizing: border-box;
         }
 
@@ -66,22 +134,21 @@
             border-left: 4px solid var(--accent);
             transition: transform 0.2s;
         }
-        .category-card:hover { transform: translateY(-5px); }
+        .category-card:hover { transform: translateY(-5px); border-color: white; }
 
-        h2 { margin-top: 0; font-size: 1.1rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-        
+        h2 { margin-top: 0; font-size: 1rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
         ul { list-style: none; padding: 0; }
-        li { margin-bottom: 10px; }
+        li { margin-bottom: 8px; }
         
         a {
             text-decoration: none;
             color: var(--text-dim);
+            font-size: 0.95rem;
             transition: color 0.2s;
-            display: block; /* Aumenta el área de clic */
+            display: block; 
         }
         a:hover { color: white; padding-left: 5px; }
 
-        /* --- MENSAJE CONCIERGE --- */
         footer { margin-top: auto; padding: 20px; color: #444; font-size: 0.8rem; }
     </style>
 </head>
@@ -93,7 +160,22 @@
     </div>
 
     <div id="search-container">
-        <input type="text" id="search-bar" placeholder="Buscar en Google (o pulsa Enter)..." autofocus>
+        <input type="text" id="search-bar" placeholder="Buscar en Google..." autofocus>
+    </div>
+
+    <div id="pomodoro">
+        <div class="timer-circle">
+            <svg>
+                <circle class="bg-ring" cx="60" cy="60" r="54"></circle>
+                <circle class="progress-ring" cx="60" cy="60" r="54" id="progress"></circle>
+            </svg>
+            <div class="time-text" id="time-display">25:00</div>
+        </div>
+        <div class="controls">
+            <button onclick="toggleTimer()" id="start-btn">Start</button>
+            <button onclick="resetTimer()">Reset</button>
+            <button class="mode-toggle" onclick="switchMode()" id="mode-btn">Descanso</button>
+        </div>
     </div>
 
     <div id="grid">
@@ -102,7 +184,7 @@
             <ul>
                 <li><a href="https://www.notion.so">Notion</a></li>
                 <li><a href="https://calendar.google.com">Google Calendar</a></li>
-                <li><a href="https://drive.google.com">Drive / Documentos</a></li>
+                <li><a href="https://drive.google.com">Drive / Docs</a></li>
                 <li><a href="https://mail.google.com">Gmail</a></li>
             </ul>
         </div>
@@ -133,38 +215,108 @@
                 <li><a href="https://www.amazon.es">Amazon</a></li>
                 <li><a href="https://music.youtube.com">YouTube Music</a></li>
                 <li><a href="https://www.netflix.com">Netflix</a></li>
-                <li><a href="#">Web de Pagos / Banco</a></li>
+                <li><a href="#">Banco / Finanzas</a></li>
             </ul>
         </div>
     </div>
 
     <footer>
-        Concierge System v1.0 • No more analysis paralysis.
+        Concierge System v2.0 • Focus Mode Active
     </footer>
 
     <script>
-        // Reloj y Fecha
+        // --- RELOJ ---
         function updateTime() {
             const now = new Date();
             const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
             const dateString = now.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            
             document.getElementById('clock').textContent = timeString;
             document.getElementById('date').textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
         }
         setInterval(updateTime, 1000);
         updateTime();
 
-        // Buscador Google
+        // --- BUSCADOR ---
         const searchBar = document.getElementById('search-bar');
         searchBar.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                const query = searchBar.value;
-                if (query) {
-                    window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-                }
+            if (e.key === 'Enter' && searchBar.value) {
+                window.location.href = `https://www.google.com/search?q=${encodeURIComponent(searchBar.value)}`;
             }
         });
+
+        // --- POMODORO LOGIC ---
+        let timer;
+        let isRunning = false;
+        let isWorkMode = true;
+        let timeLeft = 25 * 60; // 25 minutos en segundos
+        const totalTime = 25 * 60;
+        const breakTime = 5 * 60;
+
+        const timeDisplay = document.getElementById('time-display');
+        const startBtn = document.getElementById('start-btn');
+        const modeBtn = document.getElementById('mode-btn');
+        const progressRing = document.getElementById('progress');
+        
+        // Cálculo circunferencia: 2 * PI * r (r=54) ≈ 339.292
+        const circumference = 339.292;
+        progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const text = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timeDisplay.textContent = text;
+            
+            // Actualizar título de pestaña
+            document.title = isRunning ? `(${text}) Base de Operaciones` : "Base de Operaciones";
+
+            // Actualizar anillo de progreso visual
+            const currentTotal = isWorkMode ? totalTime : breakTime;
+            const offset = circumference - (timeLeft / currentTotal) * circumference;
+            progressRing.style.strokeDashoffset = offset;
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(timer);
+                startBtn.textContent = "Start";
+                isRunning = false;
+                document.title = "Base de Operaciones (Pausado)";
+            } else {
+                timer = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateDisplay();
+                    } else {
+                        clearInterval(timer);
+                        isRunning = false;
+                        startBtn.textContent = "Start";
+                        alert(isWorkMode ? "¡Tiempo! Tómate un descanso." : "¡A trabajar!");
+                    }
+                }, 1000);
+                startBtn.textContent = "Pause";
+                isRunning = true;
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            startBtn.textContent = "Start";
+            timeLeft = isWorkMode ? totalTime : breakTime;
+            updateDisplay();
+            document.title = "Base de Operaciones";
+        }
+
+        function switchMode() {
+            isWorkMode = !isWorkMode;
+            modeBtn.textContent = isWorkMode ? "Descanso" : "Trabajo";
+            // Cambiar color del anillo según modo (Opcional, cambio sutil)
+            progressRing.style.stroke = isWorkMode ? "#BB86FC" : "#03DAC6"; // Morado para work, Turquesa para break
+            resetTimer();
+        }
+
+        updateDisplay(); // Init
     </script>
 </body>
 </html>
