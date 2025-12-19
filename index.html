@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Operaciones</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-dim: #a0a0a0;
+            --accent: #BB86FC; /* Un toque morado estilo Persona/Cyber */
+            --accent-hover: #3700B3;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- RELOJ Y FECHA --- */
+        #header {
+            margin-top: 60px;
+            text-align: center;
+        }
+        #clock { font-size: 4rem; font-weight: bold; letter-spacing: 2px; }
+        #date { font-size: 1.2rem; color: var(--text-dim); margin-top: -10px; }
+
+        /* --- BUSCADOR --- */
+        #search-container { margin: 40px 0; width: 100%; max-width: 600px; padding: 0 20px; box-sizing: border-box; }
+        #search-bar {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 30px;
+            border: 2px solid var(--card-bg);
+            background-color: var(--card-bg);
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        #search-bar:focus { border-color: var(--accent); }
+
+        /* --- GRID DE ENLACES --- */
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .category-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            transition: transform 0.2s;
+        }
+        .category-card:hover { transform: translateY(-5px); }
+
+        h2 { margin-top: 0; font-size: 1.1rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+        
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 10px; }
+        
+        a {
+            text-decoration: none;
+            color: var(--text-dim);
+            transition: color 0.2s;
+            display: block; /* Aumenta el área de clic */
+        }
+        a:hover { color: white; padding-left: 5px; }
+
+        /* --- MENSAJE CONCIERGE --- */
+        footer { margin-top: auto; padding: 20px; color: #444; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <div id="clock">00:00</div>
+        <div id="date">Cargando fecha...</div>
+    </div>
+
+    <div id="search-container">
+        <input type="text" id="search-bar" placeholder="Buscar en Google (o pulsa Enter)..." autofocus>
+    </div>
+
+    <div id="grid">
+        <div class="category-card">
+            <h2>🧠 Segundo Cerebro</h2>
+            <ul>
+                <li><a href="https://www.notion.so">Notion</a></li>
+                <li><a href="https://calendar.google.com">Google Calendar</a></li>
+                <li><a href="https://drive.google.com">Drive / Documentos</a></li>
+                <li><a href="https://mail.google.com">Gmail</a></li>
+            </ul>
+        </div>
+
+        <div class="category-card">
+            <h2>💻 Dev & Cacharrear</h2>
+            <ul>
+                <li><a href="https://github.com">GitHub</a></li>
+                <li><a href="https://chatgpt.com">ChatGPT / IA</a></li>
+                <li><a href="https://www.reddit.com/r/buildapc/">Reddit BuildAPC</a></li>
+                <li><a href="https://stackoverflow.com">Stack Overflow</a></li>
+            </ul>
+        </div>
+
+        <div class="category-card">
+            <h2>🎮 Gaming Lounge</h2>
+            <ul>
+                <li><a href="https://www.dekudeals.com">DekuDeals (Ofertas)</a></li>
+                <li><a href="https://howlongtobeat.com">HowLongToBeat</a></li>
+                <li><a href="https://www.twitch.tv">Twitch</a></li>
+                <li><a href="https://store.steampowered.com">Steam Store</a></li>
+            </ul>
+        </div>
+
+        <div class="category-card">
+            <h2>🏠 Lifestyle</h2>
+            <ul>
+                <li><a href="https://www.amazon.es">Amazon</a></li>
+                <li><a href="https://music.youtube.com">YouTube Music</a></li>
+                <li><a href="https://www.netflix.com">Netflix</a></li>
+                <li><a href="#">Web de Pagos / Banco</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        Concierge System v1.0 • No more analysis paralysis.
+    </footer>
+
+    <script>
+        // Reloj y Fecha
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            const dateString = now.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            document.getElementById('clock').textContent = timeString;
+            document.getElementById('date').textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Buscador Google
+        const searchBar = document.getElementById('search-bar');
+        searchBar.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const query = searchBar.value;
+                if (query) {
+                    window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
